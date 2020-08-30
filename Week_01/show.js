@@ -19,23 +19,38 @@ function show() {
             cell.innerText =
                 pattern[j][i] == 2 ? "X" :
                 pattern[j][i] == 1 ? "O" : "";
-            cell.addEventListener("click", () => move(j, i));
+            cell.addEventListener("click", () => userMove(j, i));
             board.appendChild(cell);
         }
         board.appendChild(document.createElement("br"))
     }
+
 }
 
-function move(x, y) {
+function userMove(x, y) {
     pattern[x][y] = color;
     if (check(pattern, color)) {
         alert(color == 2 ? "X is winner!" : "O is winner!");
     }
     color = 3 - color;
+    console.log(bestChice(pattern, color));
     show();
+    computerMove();
     if (willWin(pattern, color)) {
         console.log(color == 2 ? "X will winner!" : "O will winner!")
     }
+}
+
+function computerMove() {
+    let choice = bestChice(pattern, color);
+    if (choice.point) {
+        pattern[choice.point[0]][choice.point[1]] = color;
+    }
+    if (check(pattern, color)) {
+        alert(color == 2 ? "X is winner!" : "O is winner!");
+    }
+    color = 3 - color;
+    show();
 }
 
 function check(pattern, color) {
@@ -95,11 +110,42 @@ function willWin(pattern, color) {
             let tmp = clone(pattern);
             tmp[i][j] = color;
             if (check(tmp, color)) {
-                return true;
+                return [i, j];
             }
         }
     }
-    return false;
+    return null;
+}
+
+function bestChice(pattern, color) {
+    let p;
+    if (p = willWin(pattern, color)) {
+        return {
+            point: p,
+            result: 1
+        }
+    }
+    let result = -2
+    let point = null;
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (pattern[i][j])
+                continue;
+            let tmp = clone(pattern);
+            tmp[i][j] = color;
+            let r = bestChice(tmp, 3 - color).result;
+
+            if (-r > result) {
+                result = -r;
+                point = [i, j]
+            }
+        }
+    }
+    return {
+        point: point,
+        result: point ? result : 0
+    }
 }
 
 show(pattern)
+console.log(bestChice(pattern, color));
