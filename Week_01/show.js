@@ -6,8 +6,10 @@ let pattern = [
     //棋盘格子，一维数组表示
 
 let color = 1;
+//首先落子的颜色
 
 function show() {
+    //描绘棋盘的函数
     let board = document.getElementById("board");
 
     board.innerHTML = "";
@@ -28,6 +30,7 @@ function show() {
 }
 
 function userMove(x, y) {
+    //用户移动棋子的函数
     pattern[x][y] = color;
     if (check(pattern, color)) {
         alert(color == 2 ? "X is winner!" : "O is winner!");
@@ -36,12 +39,15 @@ function userMove(x, y) {
     console.log(bestChice(pattern, color));
     show();
     computerMove();
+    /*
     if (willWin(pattern, color)) {
         console.log(color == 2 ? "X will winner!" : "O will winner!")
     }
+    */
 }
 
 function computerMove() {
+    //电脑移动棋子的函数
     let choice = bestChice(pattern, color);
     if (choice.point) {
         pattern[choice.point[0]][choice.point[1]] = color;
@@ -54,6 +60,7 @@ function computerMove() {
 }
 
 function check(pattern, color) {
+    //落子后，检查胜负的函数
     for (let i = 0; i < 3; i++) {
         let win = true;
         for (let j = 0; j < 3; j++) {
@@ -97,11 +104,12 @@ function check(pattern, color) {
 }
 
 function clone(pattern) {
-    //深拷贝
+    //深拷贝，用于预判断胜利
     return JSON.parse(JSON.stringify(pattern))
 }
 
 function willWin(pattern, color) {
+    //用于预先判断（下一步）胜利的位置
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             if (pattern[i][j]) {
@@ -118,6 +126,7 @@ function willWin(pattern, color) {
 }
 
 function bestChice(pattern, color) {
+    //搜索最佳落子位置的函数
     let p;
     if (p = willWin(pattern, color)) {
         return {
