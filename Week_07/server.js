@@ -10,7 +10,14 @@ http.createServer((Request, response) => {
         body = Buffer.concat(body).toString();
         console.log("body:", body);
         response.writeHead(200, { 'Content-Type': 'text/html' });
-        response.end(' Hello World\n');
+        response.end(
+            `<html ma=aaa>
+            <head>
+            <style>
+            div #myid{width:100px;}
+            </style>
+            </head>
+            </html>`);
     });
 }).listen(8088);
 
