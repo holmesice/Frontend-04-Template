@@ -1,0 +1,14 @@
+<script>
+    class Human {
+        constructor(name = "人") {
+            this.name = name;
+        }
+
+        hurt(obj) {
+            return `被${obj}咬了。"`;
+        }
+    }
+
+    let xiaoming = new Human()
+    console.log(xiaoming.hurt("狗"))
+</script>

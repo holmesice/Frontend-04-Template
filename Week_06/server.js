@@ -1,6 +1,6 @@
 const http = require('http');
 
-http.createServer((Request, response) => {
+http.createServer((request, response) => {
     let body = [];
     requestAnimationFrame.on('error', (err) => {
         console.error(err);

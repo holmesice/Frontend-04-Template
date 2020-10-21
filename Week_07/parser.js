@@ -1,8 +1,119 @@
+const { match } = require('assert');
+const css = require('css');
+
+const EOF = Symbol("EOF");
+
 let currentToken = null;
 let currentAttribute = null;
 
 let stack = [{ type: "document", children: [] }];
 let currentTextNode = null;
+
+//===========加入一个新的函数，addCSSRules，这里我们把CSS规则暂存到一个数组里===========
+let rules = [];
+
+function addCSSRules(text) {
+    var ast = css.parse(text);
+    console.log(JSON.stringify(ast, null, "   "));
+    rules.push(...ast.stylesheet.rules);
+}
+
+function match(element, selector) {
+    if (!selector || !element.attributes) {
+        return false;
+    }
+
+    if (selector.charAt(0) == "#") {
+        var attr = element.attributes.filter(attr => attr.name === "id")[0];
+        if (attr && attr.value === selector.replace("#", '')) {
+            return true;
+        }
+    } else if (selector.charAt(0) == ".") {
+        var attr = element.attributes.filter(attr => attr.name === "class")[0];
+        if (attr && attr.value === selector.replace(".", '')) {
+            return true;
+        }
+    } else {
+        if (element.tagName === selector) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function specificity(selector) {
+    var p = [0, 0, 0, 0];
+    var selectorParts = selectors.split(" ");
+    for (var part of selectorParts) {
+        if (part.charAt(0) == "#") {
+            p[1] += 1;
+        } else if (part.charAt(0) == ".") {
+            p[2] += 1;
+        } else {
+            p[3] += 1;
+        }
+    }
+    return p;
+}
+
+function compare(sp1, sp2) {
+    if (sp1[0] - sp2[0]) {
+        return sp1[0] - sp2[0];
+    }
+    if (sp1[1] - sp2[1]) {
+        return sp1[1] - sp2[1];
+    }
+    if (sp1[2] - sp2[2]) {
+        return sp1[2] - sp2[2];
+    }
+    return sp1[3] - ps2[3];
+}
+
+function computeCSS(element) {
+    var element = stack.slice().reverse();
+    if (element.computedStyle) {
+        element.computedStyle = {}
+    }
+
+    for (let rule of rules) {
+        var selectorParts = rule.selectors[0].split(" ").reverse();
+
+        if (!match(element, selectorParts[0])) { continue; }
+
+        let matched = false;
+
+        var j = 1;
+        for (var i = 0; i < element.length; i++) {
+            if (match(element[i], selectorParts[j])) {
+                j++;
+            }
+        }
+
+        if (j >= selectorParts.length) {
+            matched = true;
+        }
+
+        if (matched) {
+            //如果匹配到，我们要加入
+            var computedStyle = element.computedStyle;
+            for (var declaration of rule.declarations) {
+                if (!computedStyle[declaration.property]) {
+                    computedStyle[declaration.property] = {}
+                }
+
+                if (!computedStyle[declaration.property].specificity) {
+                    computedStyle[declaration.property].value = declaration.value;
+                    computedStyle[declaration.property].specificity = sp;
+                } else if (compare(computedStyle[declaration.property].specificity, sp) < 0) {
+                    computedStyle[declaration.property].value = declaration.value;
+                    computedStyle[declaration.property].specificity = sp;
+                }
+            }
+            console.log(element.computedStyle);
+        }
+
+    }
+}
 
 function emit(token) {
     if (token.type === "text") {
@@ -28,6 +139,8 @@ function emit(token) {
             }
         }
 
+        computeCSS(element);
+
         top.children.push(element);
         element.parent = top;
 
@@ -40,6 +153,10 @@ function emit(token) {
         if (top.tagName != token.tagName) {
             throw new Error("Tag start end doesn't match!");
         } else {
+            //==============遇到style标签时，执行添加CSS规则的操作=============
+            if (top.tagName === "style") {
+                addCSSRules(top.children[0].content);
+            }
             stack.pop();
         }
         currentTextNode = null;

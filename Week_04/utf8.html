@@ -1,0 +1,10 @@
+<script>
+    function UTF8_Encoding(string) {
+        let arr = [];
+        for (let i = 0; i < string.length; i++) {
+            arr.push(string[i].charCodeAt().toString(2))
+        }
+        return arr
+    }
+    console.log(UTF8_Encoding("一"));
+</script>

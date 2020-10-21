@@ -30,6 +30,35 @@
     <div id="container"></div>
     <button onclick="localStorage['map'] = JSON.stringify(map)">save</button>
     <script>
+        class Sorted {
+            constructor(data, compare) {
+                this.data = data.slice();
+                this.compare = compare || ((a, b) => a - b);
+            }
+            take() {
+                if (!this.data.length) {
+                    return;
+                }
+                let min = this.data[0];
+                let minIndex = 0;
+
+                for (let i = 1; i < this.data.length; i++) {
+                    if (this.compare(this.data[i], min) < 0) {
+                        min = this.data[i];
+                        minIndex = i;
+                    }
+                }
+
+                this.data[minIndex] = this.data[this.data.length - 1];
+                this.data.pop();
+                return min;
+            }
+            give(v) {
+                this.data.push(v);
+            }
+        }
+
+
         let map = localStorage["map"] ? JSON.parse(localStorage["map"]) : Array(10000).fill(0);
 
         let container = document.getElementById("container");
@@ -77,23 +106,30 @@
         async function findPath(map, start, end) {
             let table = Object.create(map);
             //复制数组
-            let queue = [start];
-
+            let queue = new Sorted([start], (a, b) => distance(a) - distance(b));
+            //console.log(queue);
             async function insert(x, y, pre) {
-                if (x < 0 || x >= 100 || y < 0 || y >= 100)
+                if (x < 0 || x >= 100 || y < 0 || y >= 100) {
                     return;
-                if (table[y * 100 + x])
+                }
+                if (table[y * 100 + x]) {
                     return;
+                }
 
                 await sleep(5);
                 container.children[y * 100 + x].style.backgroundColor = "Lightgreen";
                 table[y * 100 + x] = pre;
-                queue.push([x, y]);
+                queue.give([x, y]);
             }
 
-            while (queue.length) {
-                let [x, y] = queue.shift();
+            function distance(point) {
+                //计算point点到end点的距离
+                return (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2;
+            }
 
+            //console.log(queue.data.length);
+            while (queue.data.length) {
+                let [x, y] = queue.take();
                 if (x === end[0] && y === end[1]) {
                     let path = [];
 
@@ -103,7 +139,6 @@
                         await sleep(30);
                         container.children[y * 100 + x].style.backgroundColor = "purple";
                     }
-
                     return path;
                 }
 
