@@ -12,4 +12,4 @@ CSS的计算。
 在计算CSS中，必须知道元素的所有父元素才能判断元素的规则是否匹配。因为我们首先获取的是“当前元素”，所以我们获得和计算父元素匹配的顺序是从内向外。
 选择器也要从当前元素向外排列。
 一旦选择匹配就应用选择器到元素上，形成computedStyle。
-CSS规则根据specificity和后来优先规则覆盖。specificity是四元组，越左边权重越高。一个CSS规则的specificity根据包含的简单选择器相加而成。
+CSS规则根据specificity和后来优先规则覆盖。specificity是四元组，越左边权重越高。一个CSS规则的specificity根据包含的简单选择器相加而成
