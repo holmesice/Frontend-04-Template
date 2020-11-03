@@ -308,7 +308,7 @@ function layout(element) {
 
             var align = itemStyle.alignSelf || style.alignItems;
 
-            if (itemStyle[crossSize] === null) {
+            if (item === null) {
                 itemStyle[crossSize] = (aling === 'stretch') ?
                     lineCrossSize : 0
             }
